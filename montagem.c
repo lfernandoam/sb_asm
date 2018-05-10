@@ -5,6 +5,7 @@
 // #include <ctype.h> //pode ser util para verificar o conteudo da string. Ex: se eh maisculo (converte tbm)
 
 int endereco=0;
+int offset=0;
 
 typedef struct SymbTable{ /* A tabela para instrucao EQU */
     char symbol[20];
@@ -78,6 +79,16 @@ int checkTable(SymbTable* tSymb, int tamSymb, char* token, int tam_token){
 }
 
 
+int desloc(char* token){
+    if(offset){
+        //printf("deslocccc\n");
+        printf("valor de offset: %d\n",atoi(token));
+        return atoi(token);
+    }
+    return 0;
+
+}
+
 int getToken(char* fonte,int *pos, char* token) {
     //printf("get token, fonte:\n%s\n", fonte);
     int i = 0, j = *pos, k=0; //k eh pra compensar os caracteres que a busca por token ignorou (util para 'pos')
@@ -92,7 +103,11 @@ int getToken(char* fonte,int *pos, char* token) {
 		i++;j++;
 		//printf("\nfonte[j]= %c (n-1: %c)\n",fonte[j],fonte[j-1]);
         //if((fonte[j]==':')||(fonte[j-1]==':')) break;
-        if((fonte[j]=='+')||(fonte[j-1]=='+')) break;
+        if((fonte[j]=='+')||(fonte[j-1]=='+')){
+            offset=1;
+            //printf("setei offset\n");
+            break;
+        }
         if((fonte[j]=='-')||(fonte[j-1]=='-')) break;
         if((fonte[j]==',')||(fonte[j-1]==',')) break;
 
@@ -108,6 +123,7 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
     int i=0,j=0;
     int pos=0;
     int aux;
+    char auxtoken[20];
     int tam_fonte=strlen(fonte);
     //printf("segPassagem, fonte:\n%s\n", fonte);
 
@@ -126,71 +142,170 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
         if(strcmp(token,"ADD")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("1 %d ",checkTable(tSymb,tamSymb,token,tam_token));
-                    //int checkTable(SymbTable* tSymb, int *tamSymb, char* token, int tam_token){
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("1 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"SUB")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("2 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("2 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"MULT")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("3 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("3 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"DIV")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("4 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("4 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"JMP")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("5 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("5 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"JMPN")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("6 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("6 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"JMPP")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("7 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("7 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"JMPZ")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("8 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("8 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"COPY")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("9 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("9 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
+
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("%d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("%d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"LOAD")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("10 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("10 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"STORE")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("11 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("11 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"INPUT")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("12 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("12 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            //printf("checktable = %d\n",checkTable(tSymb,tamSymb,auxtoken,tam_token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"OUTPUT")==0){
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
-            printf("13 %d ",checkTable(tSymb,tamSymb,token,tam_token));
+
+            strcpy(auxtoken,token);
+            if (offset){
+                pos+=getToken(fonte, &pos, token);
+                tam_token=strlen(token);
+            }
+            printf("13 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
+            offset=0; // VERIFICAFR SE EH AQUI QUE DEVEMOS ZERAR A FLAG
         }
         else if(strcmp(token,"STOP")==0){
             printf("14 ");

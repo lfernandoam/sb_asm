@@ -1,2 +1,2 @@
-# software-basico-1
+# sb_asm
 Montador de um Assembly hipotético

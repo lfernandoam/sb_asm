@@ -7,11 +7,17 @@
 
 int endereco=0;
 int offset=0;
+int linha=1;
 
 typedef struct SymbTable{ /* A tabela para instrucao EQU */
     char symbol[20];
     char value;
     }SymbTable;
+
+typedef struct LineTable{ /* A tabela para instrucao EQU */
+    int orig;
+    int macro;
+    }LineTable;
 
 
 int getToken(char* fonte,int *pos, char* token);
@@ -38,7 +44,7 @@ void primPassagem(SymbTable* tSymb, int *tamSymb, char* token, int tam_token){
             //printf("TOKEN: %s\n",token);
             if(strcmp(token,tSymb[i].symbol)==0){
                 existe=1;
-                //printf("Existe na tabela.\n"); // erro semantico
+                printf("ERRO SEMANTICO: Linha %d com Rotulo repetido.\n",linha); // erro semantico
             }
         }
         if (!existe){
@@ -73,7 +79,11 @@ int desloc(char* token){
 }
 
 int getToken(char* fonte,int *pos, char* token) {
-    int i = 0, j = *pos; //k eh pra compensar os caracteres que a busca por token ignorou (util para 'pos')
+    int i = 0, j = *pos;
+    if(fonte[j] == '\n'){
+        printf("linha: %d\n",linha);
+        linha++;
+	}
 	while(fonte[j] == '\n' || fonte[j] == '\t' || fonte[j] == ' ' || fonte[j] == '\r' || fonte[j] == '\0' || fonte[j]=='+' || fonte[j]==',') {
         j++;;
         ++*pos;
@@ -119,6 +129,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("1 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"SUB")==0){
@@ -129,6 +142,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("2 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"MULT")==0){
@@ -138,6 +154,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             if (offset){
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
+            }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
             }
             printf("3 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
@@ -150,6 +169,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente ou divisao por zero\n",linha);
+            }
             printf("4 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"JMP")==0){
@@ -159,6 +181,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             if (offset){
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
+            }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
             }
             printf("5 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
@@ -170,6 +195,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("6 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"JMPP")==0){
@@ -180,6 +208,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("7 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"JMPZ")==0){
@@ -189,6 +220,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             if (offset){
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
+            }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
             }
             printf("8 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
@@ -205,6 +239,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             //printf("auxtoken1: %s\n",auxtoken);
             //printf("checkTable(auxtoken)=%d\n",checkTable(tSymb,tamSymb,auxtoken,tam_token));
             //printf("token %s\n",token);
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("9 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
             pos+=getToken(fonte, &pos, token);
             tam_token=strlen(token);
@@ -217,6 +254,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             //printf("auxtoken2: %s\n",auxtoken);
             //printf("checkTable(auxtoken)=%d\n",checkTable(tSymb,tamSymb,auxtoken,tam_token));
             //printf("token %s\n",token);
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("%d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"LOAD")==0){
@@ -228,6 +268,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("10 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"STORE")==0){
@@ -238,6 +281,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
+            }
             printf("11 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"INPUT")==0){
@@ -247,6 +293,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
             if (offset){
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
+            }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente.\n",linha);
             }
             printf("12 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
             //printf("checktable = %d\n",checkTable(tSymb,tamSymb,auxtoken,tam_token));
@@ -260,6 +309,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
                 pos+=getToken(fonte, &pos, token);
                 tam_token=strlen(token);
             }
+            if(checkTable(tSymb,tamSymb,auxtoken,tam_token)==-1){
+                printf("ERRO SEMANTICO: Linha %d com Rotulo ausente\n",linha);
+            }
             printf("13 %d ",checkTable(tSymb,tamSymb,auxtoken,tam_token) + desloc(token));
         }
         else if(strcmp(token,"STOP")==0){
@@ -268,6 +320,9 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int tam
         }
         else if(strcmp(token,"SPACE")==0){
             //aux=pos;
+            //printf("linha do space %d\n",linha);
+
+            //VERIFICAR SE VAI DAR A LINHA CORRETA SE TIVER ERRO NA PARTE DOS SPACE
             pos+=getToken(fonte, &pos, token);
             j=atoi(token);
             if (j==0){
@@ -296,7 +351,7 @@ int monta(char* fonte){
     int tamSymb=0;
     SymbTable *tSymb = (SymbTable*) malloc(sizeof(SymbTable));
     char token[21];
-    int aux;
+    //int aux;
     int i=0,j=0;
     int pos=0;
     int tam_fonte=strlen(fonte);
@@ -357,7 +412,7 @@ int monta(char* fonte){
             endereco+=1;
         }
         else if(strcmp(token,"SPACE")==0){
-            aux=pos;
+            //aux=pos;
             pos+=getToken(fonte, &pos, token);
             j=atoi(token);
             if (j==0){
@@ -373,7 +428,6 @@ int monta(char* fonte){
         else if(strcmp(token,"CONST")==0){
             endereco+=1;
             pos+=getToken(fonte, &pos, token);
-            j=atoi(token);
             //printf("%d ",j);
         }
         tam_token=strlen(token);
@@ -381,6 +435,8 @@ int monta(char* fonte){
         pos+=getToken(fonte, &pos, token);
         tam_token=strlen(token);
     }
+    linha=1;
+    printf("\n\nSeg Passagem\n");
     segPassagem(fonte, tSymb, tamSymb,token,tam_token);
     return 1;
 }

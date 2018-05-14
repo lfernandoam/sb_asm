@@ -15,6 +15,8 @@
 //OBS: NAO PODE HAVER LABEL/ROTULO NA LINHA DO SECTION DATA (L1: SECTION DATA), POIS CONSIDERO <FIM COMO SECTION TEXT
 //...MAS NA VDD <FIM TBM INCLUI A LINHA DO SECTION DATA
 
+//CORRIGIR DIRETIVA CONST ACEITAR QUALQUER COISA COMO ARGUMENTO. ALEM DISSO, DEVE ACEITAR VALORES EM HEXA.
+
 //int endereco=0;
 int offset=0;
 int linha=1;
@@ -25,7 +27,7 @@ FILE *fp_o;
 typedef struct SymbTable{ /*Tabela de Simbolos*/
     char symbol[20]; //nome do simbolo
     char end; //endereco
-    int const_value; //valor de sua constante (-9999 se nao eh const)
+    long int const_value; //valor de sua constante (-9999 se nao eh const)
     //int space_size; //tamanho do campo space (quantos enderecos esta diretiva aloca)
     }SymbTable;
 
@@ -40,7 +42,7 @@ int monta(char* fonte);
 int passar_pra_string(FILE *fp_mcr, char* fonte, long tam_fonte);
 void insertTable(SymbTable* tSymb, int *tamSymb, char* token, int endereco, int const_value);
 int checkEnd(SymbTable* tSymb, int tamSymb, char* token);
-int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int endf);
+void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int endf);
 
 void exibe(SymbTable *tSymb, int tamSymb){
     int i;
@@ -48,7 +50,7 @@ void exibe(SymbTable *tSymb, int tamSymb){
     for(i=0;i<tamSymb;i++){
         printf("tSymb[i].symbol: %s | ",tSymb[i].symbol);
         printf("tSymb[i].end: %d | ",tSymb[i].end);
-        printf("tSymb[i].const_value: %d | ",tSymb[i].const_value);
+        printf("tSymb[i].const_value: %ld | ",tSymb[i].const_value);
         //printf("tSymb[i].space_size: %d\n",tSymb[i].space_size);
     }
 }
@@ -96,14 +98,14 @@ int desloc(char* token){
     }
     return 0;
 }
-
+// remover condicao para || fonte[j] == '\0'
 int getToken(char* fonte,int *pos, char* token) {
     int i = 0, j = *pos;
     if(fonte[j] == '\n'){
         //printf("linha: %d\n",linha);
         linha++;
 	}
-	while(fonte[j] == '\n' || fonte[j] == '\t' || fonte[j] == ' ' || fonte[j] == '\r' || fonte[j] == '\0' || fonte[j]=='+' || fonte[j]==',') {
+	while(fonte[j] == '\n' || fonte[j] == '\t' || fonte[j] == ' ' || fonte[j] == '\r' || fonte[j]=='+' || fonte[j]==',') {
         j++;;
         ++*pos;
 	}
@@ -130,13 +132,13 @@ int getToken(char* fonte,int *pos, char* token) {
 	return tam;
 }
 
-int getConstValue(char* fonte,int j) {
+long int getConstValue(char* fonte,int j) {
     int i = 0;
     char valor[21];
     int ehconst=0;
     //printf("fonte[j]=%c",fonte[j]);
     //primeiro token
-	while(fonte[j] == '\n' || fonte[j] == '\t' || fonte[j] == ' ' || fonte[j] == '\r' || fonte[j] == '\0' || fonte[j]=='+' || fonte[j]==',') {
+	while(fonte[j] == '\n' || fonte[j] == '\t' || fonte[j] == ' ' || fonte[j] == '\r' || fonte[j]=='+' || fonte[j]==',') {
         j++;
 	}
 	while(fonte[j] != '\n' && fonte[j] != '\t' && fonte[j] != ' ' && fonte[j] != '\r' && fonte[j] != '\0') {
@@ -159,11 +161,19 @@ int getConstValue(char* fonte,int j) {
 		i++;j++;
 	}
 	valor[i] = '\0';
-	if (ehconst) return atoi(valor);
+	if (ehconst) {
+        //printf("\n\n\nvalor:%sa\n\n",valor);
+        if((valor[1]=='X')||(valor[1]=='x')){
+            //printf("\n\strtol(valor,NULL,0): %d\n",strtol(valor,NULL,0));
+            return strtol(valor,NULL,0);
+        }else{
+            return atoi(valor);
+        }
+	}
 	return -9999;
 }
 
-int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int endf){
+void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int endf){
     int i=0,j=0;
     int pos=0;
     char auxtoken[20];
@@ -497,14 +507,18 @@ int segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int end
             }
         }else if(strcmp(token,"CONST")==0){
             pos+=getToken(fonte, &pos, token);
-            j=atoi(token);
-            //printf("%d ",j);
-            fprintf(fp_o,"%d ",j);
+            if((token[1]=='X')||(token[1]=='x')){
+                //printf("\n\strtol(token,NULL,0): %d\n",strtol(token,NULL,0));
+                j=strtol(token,NULL,0);
+            }else{
+                j=atoi(token);
+            }
+            //printf("%ld ",j);
+            fprintf(fp_o,"%ld ",j);
         }else{
             pos+=getToken(fonte, &pos, token);
         }
     }
-    return 1;
 }
 
 
@@ -515,7 +529,7 @@ int monta(char* fonte){
     char auxtoken[21];
     int endereco=0;
     //int aux;
-    int const_value=-9999; //j eh diferente de -9999 sempre que eh const
+    long int const_value=-9999; //j eh diferente de -9999 sempre que eh const
     int space_size=0;
     int pos=0;
     int tam_fonte=strlen(fonte);
@@ -595,7 +609,7 @@ int monta(char* fonte){
 
         if (token[tam_token-1]==':'){ // se eh rotulo
             const_value=getConstValue(fonte,pos);
-            //printf("const_value: %d\n",const_value);
+            //printf("const_value: %ld\n",const_value);
             insertTable(tSymb, &tamSymb, token, endereco, const_value);
         }
         const_value=-9999; //const_value eh -9999 sempre que nao eh const
@@ -608,6 +622,7 @@ int monta(char* fonte){
         if(strcmp(strcat(auxtoken,token),"SECTION DATA")==0){
             fim=endereco;
         }
+        //printf("..pos %d\n",pos);
     }
     //endereco--; //a ultima instrucao sempre soma 1 endereco (SPACE ou CONST) pra compatibilizar com a linha seguinte
     linha=1;

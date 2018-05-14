@@ -62,6 +62,7 @@ void insertTable(SymbTable* tSymb, int *tamSymb, char* token, int endereco, int 
         if(strcmp(token,tSymb[i].symbol)==0){
             existe=1;
             printf("ERRO SEMANTICO: Linha %d com Rotulo repetido.\n",linha); // erro semantico
+            erro=1;
         }
     }
     if (!existe){

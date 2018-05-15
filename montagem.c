@@ -27,7 +27,8 @@ FILE *fp_o;
 typedef struct SymbTable{ /*Tabela de Simbolos*/
     char symbol[20]; //nome do simbolo
     char end; //endereco
-    long int const_value; //valor de sua constante (-9999 se nao eh const)
+
+    long int const_value; //valor de sua constante (-99999 se nao eh const)
     //int space_size; //tamanho do campo space (quantos enderecos esta diretiva aloca)
     }SymbTable;
 
@@ -170,11 +171,12 @@ long int getConstValue(char* fonte,int j) {
             return atoi(valor);
         }
 	}
-	return -9999;
+	return -99999;
 }
 
 void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int endf){
-    int i=0,j=0;
+    int i=0;
+    long int j=0;
     int pos=0;
     char auxtoken[20];
     int tam_fonte=strlen(fonte);
@@ -390,7 +392,7 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
             }
             for(i=0;i<tamSymb;i++){
                 if(strcmp(auxtoken,tSymb[i].symbol)==0){
-                    if(tSymb[i].const_value!=-9999){
+                    if(tSymb[i].const_value!=-99999){
                         printf("ERRO SEMANTICO: Linha %d com modificação de um valor constante.\n",linha);
                         erro=1;
                     }
@@ -438,7 +440,7 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
             }
             for(i=0;i<tamSymb;i++){
                 if(strcmp(auxtoken,tSymb[i].symbol)==0){
-                    if(tSymb[i].const_value!=-9999){
+                    if(tSymb[i].const_value!=-99999){
                         printf("ERRO SEMANTICO: Linha %d com modificação de um valor constante.\n",linha);
                         erro=1;
                     }
@@ -512,8 +514,8 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
                 j=strtol(token,NULL,0);
             }else{
                 j=atoi(token);
+                //printf ("valor const: %ld.\n",j);
             }
-            //printf("%ld ",j);
             fprintf(fp_o,"%ld ",j);
         }else{
             pos+=getToken(fonte, &pos, token);
@@ -529,7 +531,7 @@ int monta(char* fonte){
     char auxtoken[21];
     int endereco=0;
     //int aux;
-    long int const_value=-9999; //j eh diferente de -9999 sempre que eh const
+    long int const_value=-99999; //j eh diferente de -99999 sempre que eh const
     int space_size=0;
     int pos=0;
     int tam_fonte=strlen(fonte);
@@ -612,7 +614,7 @@ int monta(char* fonte){
             //printf("const_value: %ld\n",const_value);
             insertTable(tSymb, &tamSymb, token, endereco, const_value);
         }
-        const_value=-9999; //const_value eh -9999 sempre que nao eh const
+        const_value=-99999; //const_value eh -99999 sempre que nao eh const
         space_size=0;
 
         strcpy(auxtoken,token);

@@ -16,7 +16,7 @@ char buffer[512], buffer2[512], rot[100], instruction[20], operand1[20], invalid
 int offset=0;
 int linham=1; // contador de linhas utilizada na funcao de montagem
 int fim=0;
-
+int montagem=0;
 //typedef struct line_fonte{  /* linhas na saida preprocessado correspondente ao fonte */
 //	int value;
 //}line_fonte;
@@ -85,6 +85,7 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 
 int scanner(char* buffer) {
 	int i=0;
+
 	while (i<=len) {
 
 		if (buffer[i]==';') {   /* tirar os Comentarios */
@@ -92,11 +93,13 @@ int scanner(char* buffer) {
 		}
 
 		buffer[i]=toupper(buffer[i]);  /* Converter carecteres para maiscula*/
-		/* verifcar os tokens */
+		/* verificar os tokens */
 		if(!(((buffer[i]>='A')&&(buffer[i]<='Z'))||((buffer[i]>='0')&&(buffer[i]<='9'))||(buffer[i]==';')
 		        ||(buffer[i]=='+')||(buffer[i]=='-')||(buffer[i]==',')||(buffer[i]==':')||(buffer[i]==' ')
 		        ||(buffer[i]=='&')||(buffer[i]==0x09)||(buffer[i]=='_')||(buffer[i]=='\0')||(buffer[i]=='\n'))) {
-			printf("\n\tERRO LÉXICO: linha %d, Token \'%c\' invalido\n",line,buffer[i]);
+           // if(montagem){
+                printf("\nERRO LEXICO: linha %d, Token \'%c\' invalido\n",line,buffer[i]);
+           // }
 			erro=1;
 		}
 		i++;
@@ -115,7 +118,7 @@ int findrot_macro(char* buffer) {
 		buffer[i]=toupper(buffer[i]);
 		if(buffer[i]==':') {  /* procurar Rotulos */
 			if(rotfinder==1) {
-				printf("\n\tERRO SINTÁTICO: linha %d, Dois rótulos na mesma linha\n", line);
+				printf("\nERRO SINTÁTICO: linha %d, Dois rótulos na mesma linha\n", line);
 				erro=1;
 			} else {
 				rotfinder=1;
@@ -174,7 +177,7 @@ int passer(char* buffer) {
 		}
 		if(buffer[i]==':') {  /* procurar Rotulos */
 			if(rotfinder==1) {
-				printf("\n\tERRO SINTÁTICO: linha %d, Dois rótulos na mesma linha\n", line);
+				printf("\nERRO SINTÁTICO: linha %d, Dois rótulos na mesma linha\n", line);
 				erro=1;
 			} else {
 				rotfinder=1;
@@ -219,18 +222,18 @@ void verificar_secao(char*inst, int mode) {
 	case TEXT:
 		if(sec_TEXT_DATA[TEXT]) {
 			if(line<textStart) {
-				printf("\n\tERRO SEMÂNTICO: linha %d, Instrução \"%s\" não está na secao TEXT\n",line,inst);
+				printf("\nERRO SEMÂNTICO: linha %d, Instrução \"%s\" não está na secao TEXT\n",line,inst);
 				erro=1;
 			} else if(sec_TEXT_DATA[DATA])
 				if(line>dataStart) {
-					printf("\n\tERRO SEMÂNTICO: linha %d, Instrução \"%s\" não está na secao TEXT\n",line,inst);
+					printf("\nERRO SEMÂNTICO: linha %d, Instrução \"%s\" não está na secao TEXT\n",line,inst);
 					erro=1;
 				}
 		}
 		break;
 	case DATA:
 		if((!sec_TEXT_DATA[DATA])&&sec_TEXT_DATA[TEXT]) {
-			printf("\n\tERRO SEMÂNTICO: linha %d, Diretiva \"%s\' não está na secao DATA\n",line,inst);
+			printf("\nERRO SEMÂNTICO: linha %d, Diretiva \"%s\' não está na secao DATA\n",line,inst);
 			erro=1;
 		}
 	}
@@ -341,7 +344,7 @@ int analisar_Instrucao(char *rot, char *inst, char *op1, char *op2){ /*essa func
 			sec_TEXT_DATA[DATA]=1;
 			dataStart=line;
 		} else {
-			printf("\n\tERRO SEMÂNTICO: linha %d, secao \"%s\" invalida\n",line,op1);
+			printf("\nERRO SEMÂNTICO: linha %d, secao \"%s\" invalida\n",line,op1);
 			erro=1;
 		}
 	} else if(strcmp(inst,"SPACE")==0) {
@@ -350,36 +353,36 @@ int analisar_Instrucao(char *rot, char *inst, char *op1, char *op2){ /*essa func
 		verificar_secao(inst,DATA);
 	} else {
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==0)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Instrução \"%s\" invalida\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Instrução \"%s\" invalida\n",line,inst);
 			erro=1;
 		}
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==1)){
-			printf("\n\tERRO SINTÁTICO: linha %d, Diretiva \"%s\" invalida\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Diretiva \"%s\" invalida\n",line,inst);
 			erro=1;
 		}
 		if ((sec_TEXT_DATA[TEXT]==0)&&(strcmp(instruction,"EQU")!=0)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Diretiva \"%s\" invalida\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Diretiva \"%s\" invalida\n",line,inst);
 			erro=1;
 		}
 	}
 	if(opnum>0) {
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==0)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Instrução \"%s\" com operandos a mais\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Instrução \"%s\" com operandos a mais\n",line,inst);
 			erro=1;
 		}
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==1)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Diretiva \"%s\" com operandos a mais\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Diretiva \"%s\" com operandos a mais\n",line,inst);
             erro=1;
 		}
 	}
 
 	else if(opnum<0) {
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==0)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Instrução \"%s\" com operandos a menos\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Instrução \"%s\" com operandos a menos\n",line,inst);
 			erro=1;
 		}
 		if ((sec_TEXT_DATA[TEXT]==1)&&(sec_TEXT_DATA[DATA]==1)) {
-			printf("\n\tERRO SINTÁTICO: linha %d, Diretiva \"%s\" com operandos a menos\n",line,inst);
+			printf("\nERRO SINTÁTICO: linha %d, Diretiva \"%s\" com operandos a menos\n",line,inst);
 			erro=1;
 		}
 	}
@@ -448,11 +451,11 @@ int pre_processamento(FILE *fileIN, FILE *fileOUT) {   /* A funcao que faz o pre
 	}
 
 	if(!sec_TEXT_DATA[TEXT]) {
-		printf("\n\tERRO SEMÂNTICO: secao TEXT não declarada");
+		printf("\nERRO SEMÂNTICO: secao TEXT não declarada");
 		erro=1;
 	}
 	if(!sec_TEXT_DATA[DATA]) {
-		printf("\n\tERRO SEMÂNTICO: secao DATA não declarada");
+		printf("\nERRO SEMÂNTICO: secao DATA não declarada");
 		erro=1;
 	}
 	  return 1;
@@ -558,6 +561,7 @@ int desloc(char* token) {
 
 int getToken(char* fonte,int *pos, char* token) {
 	int i = 0, j = *pos;
+
 	if(fonte[j] == '\n') {
 		linham++;
 	}
@@ -634,6 +638,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 		offset=0;
 		if(strcmp(token,"ADD")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -652,6 +660,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"1 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"SUB")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -670,6 +682,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"2 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"MULT")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -688,7 +704,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"3 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"DIV")==0) {
 			pos+=getToken(fonte, &pos, token);
-
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -715,6 +734,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"4 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"JMP")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -733,6 +756,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"5 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"JMPN")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -751,6 +778,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"6 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"JMPP")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -769,6 +800,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"7 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"JMPZ")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -787,7 +822,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"8 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"COPY")==0) {
 			pos+=getToken(fonte, &pos, token);
-
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -805,6 +843,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			//printf("9 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 			fprintf(fileOUT,"9 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -831,7 +873,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"%d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"LOAD")==0) {
 			pos+=getToken(fonte, &pos, token);
-
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -850,6 +895,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"10 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"STORE")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -877,6 +926,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"11 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"INPUT")==0) {
 			pos+=getToken(fonte, &pos, token);
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -895,7 +948,10 @@ void segPassagem(char* fonte, SymbTable* tSymb, int tamSymb, char* token, int en
 			fprintf(fileOUT,"12 %d ",checkEnd(tSymb,tamSymb,auxtoken) + desloc(token));
 		} else if(strcmp(token,"OUTPUT")==0) {
 			pos+=getToken(fonte, &pos, token);
-
+            if((token[0]>='0')&&(token[0]<='9')){
+                printf("ERRO LEXICO: linha %d, Token \'%s\' invalido\n",linham,token);
+                erro=1;
+            }
 			strcpy(auxtoken,token);
 			if (offset) {
 				pos+=getToken(fonte, &pos, token);
@@ -1111,7 +1167,8 @@ int main (int argc, char* argv[]) {
 		printf("\nExpansao de macros realizada com sucesso!\n");
 
 	} else if(strcmp(argument,"-o")==0) { // Montagem do codigo
-
+        montagem=1;
+        printf("\t RELATORIO DA MONTAGEM\n");
 		if((fileIN=fopen(strcat(file_in,".asm"),"r"))==NULL) {
 			printf("\n\nERRO! Arquivo não encontrado.\n");
 			return 0;
@@ -1126,13 +1183,12 @@ int main (int argc, char* argv[]) {
         fclose(fileOUT);
 
 		if((fileIN=fopen(file_out,"r"))==NULL) {
-			printf("\n\n\t\tERRO! Arquivo não encontrado.\n");
+			printf("\n\nERRO! Arquivo não encontrado.\n");
 			return 0;
 		}
 		strcat(aux_out,".mcr"); // extensao do arquivo de saida
 		if((fileOUT=fopen(aux_out,"w"))==NULL) {
-            printf("<DEBUG> arquivo de .mcr saida: %s\n", aux_out);
-			printf("\n\n\t\tERRO! não foi possivel criar arquivo.\n");
+			printf("\n\nERRO! não foi possivel criar arquivo.\n");
 			return 0;
 		}
 		macros(fileIN,fileOUT);
@@ -1141,7 +1197,7 @@ int main (int argc, char* argv[]) {
         fclose(fileOUT);
 
 		if((fileIN=fopen(aux_out,"r"))==NULL) {
-			printf("\n\n\t\tERRO! Arquivo não encontrado.\n");
+			printf("\n\n\tERRO! Arquivo não encontrado.\n");
 			return 0;
 		} else {
             strcat(aux_out2,".o"); // extensao do arquivo de saida
@@ -1154,8 +1210,6 @@ int main (int argc, char* argv[]) {
                 printf("Erro ao ler o fonte.\n");
                 return 0;
             }
-            printf("\nARQUIVO QUE SERA MONTADO:\n\n%s\n", fonte);
-            printf("Relatorio da montagem:\n\n");
             fileOUT=fopen(aux_out2,"w");
             if(!fileOUT){
                 printf("Erro ao criar o arquivo.\n");
@@ -1163,6 +1217,7 @@ int main (int argc, char* argv[]) {
             }
             else {
                 monta(fonte,fileOUT);
+                printf("\nArquivo fonte processado:\n\n%s\n", fonte);
                 if(!erro) {
                     printf("Arquivo montado com sucesso!\n");
                 } else {
